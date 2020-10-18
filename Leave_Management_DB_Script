@@ -1,0 +1,229 @@
+Create Queries:
+
+CREATE TABLE Leave_Request_Details
+( Leave_Request_ID int NOT NULL,
+  Employee_Name varchar2(50) NOT NULL,
+  Employee_Email varchar2(50)NOT NULL,
+  Manager_Name varchar2(50) NOT NULL,
+  Manager_Email varchar2(50) NOT NULL,
+  Leave_Start_Date date NOT NULL,
+  Leave_End_Date date NOT NULL,
+  Leave_Type_ID varchar2(50) NOT NULL,
+  Leave_Reason Varchar(100) ,
+  Leave_Status_ID varchar2(50) NOT NULL,
+  CONSTRAINT Leave_Request_Details_pk PRIMARY KEY (Leave_Request_ID)
+);
+
+
+CREATE TABLE Leave_Type
+( Leave_Type_ID int NOT NULL,
+  Leave_Type varchar2(100) NOT NULL, 
+  CONSTRAINT Leave_Type_pk PRIMARY KEY (Leave_Type_ID)
+);
+
+
+CREATE TABLE Leave_Status
+( Leave_Status_ID int NOT NULL,
+  Leave_Status varchar2(100) NOT NULL, 
+  CONSTRAINT Leave_Status_pk PRIMARY KEY (Leave_Status_ID)
+);
+
+
+CREATE TABLE Modified_Leave_Details
+( Rework_ID int NOT NULL,
+  Leave_Request_ID int NOT NULL,
+  Leave_Start_Date varchar2(50)NOT NULL,
+  Leave_End_Date varchar2(50) NOT NULL,
+  Leave_Type_ID varchar2(50) NOT NULL,
+  Leave_Reason Varchar(100) ,
+  CONSTRAINT Rework_ID_pk PRIMARY KEY (Rework_ID),
+  CONSTRAINT Leave_Request_ID_pk
+  FOREIGN KEY (Leave_Request_ID)
+  REFERENCES Leave_Request_Details (Leave_Request_ID)
+);
+
+
+Insert Queries:
+
+INSERT INTO leave_request_details
+(Leave_Request_ID, Employee_Name, Employee_Email, Manager_Name, Manager_Email, Leave_Start_Date, Leave_End_Date, Leave_Type_ID, Leave_Reason, Leave_Status_ID)
+VALUES
+('1','Yashi', 'yashi.sarbhai@uconn.edu', 'Rashi', 'rashi.saxena@uconn.edu', '23-DEC-2019', '29-DEC-2019', '3', 'Vacation Leave', '1');
+
+
+INSERT INTO leave_request_details
+(Leave_Request_ID, Employee_Name, Employee_Email, Manager_Name, Manager_Email, Leave_Start_Date, Leave_End_Date, Leave_Type_ID, Leave_Reason, Leave_Status_ID)
+VALUES
+('6','Yashi', 'yashi.sarbhai@uconn.edu', 'Rashi', 'rashi.saxena@uconn.edu', '19-Jun-2019', '20-Jun-2019', '1', 'Marriage leaves', '3');
+
+
+
+INSERT INTO leave_request_details
+(Leave_Request_ID, Employee_Name, Employee_Email, Manager_Name, Manager_Email, Leave_Start_Date, Leave_End_Date, Leave_Type_ID, Leave_Reason, Leave_Status_ID)
+VALUES
+('2','Anusha', 'anusha.karunakaran@uconn.edu', 'Karthik', 'Karthik.suvarnasa@uconn.edu', '01-Jun-2019', '08-Jun-2019', '1', 'Personal Leave', '2');
+
+
+INSERT INTO leave_request_details
+(Leave_Request_ID, Employee_Name, Employee_Email, Manager_Name, Manager_Email, Leave_Start_Date, Leave_End_Date, Leave_Type_ID, Leave_Reason, Leave_Status_ID)
+VALUES
+('3','Kavya', 'Kavya.shekhara@uconn.edu', 'Rashi', 'rashi.saxena@uconn.edu', '01-Jan-2019', '03-Jan-2019', '2', 'Sick Leave', '1');
+
+INSERT INTO leave_request_details
+(Leave_Request_ID, Employee_Name, Employee_Email, Manager_Name, Manager_Email, Leave_Start_Date, Leave_End_Date, Leave_Type_ID, Leave_Reason, Leave_Status_ID)
+VALUES
+('4','Sriram', 'sriram.kumar@uconn.edu', 'Karthik', 'Karthik.suvarnasa@uconn.edu', '01-Apr-2019', '03-Apr-2019', '1', 'Personal Leave', '3');
+
+
+INSERT INTO leave_request_details
+(Leave_Request_ID, Employee_Name, Employee_Email, Manager_Name, Manager_Email, Leave_Start_Date, Leave_End_Date, Leave_Type_ID, Leave_Reason, Leave_Status_ID)
+VALUES
+('5','Sahil', 'sahil.Paryani@uconn.edu', 'Rashi', 'rashi.saxena@uconn.edu', '16-Aug-2019', '22-Aug-2019', '2', 'Sick Leave', '1');
+
+
+===============================================================================================================================
+
+
+INSERT INTO leave_type
+(Leave_Type_ID, Leave_Type)
+VALUES
+('1', 'Casual');
+
+INSERT INTO leave_type
+(Leave_Type_ID, Leave_Type)
+VALUES
+('2', 'Sick');
+
+INSERT INTO leave_type
+(Leave_Type_ID, Leave_Type)
+VALUES
+('3', 'Earned');
+
+=================================================================================================
+
+
+
+INSERT INTO leave_status
+(Leave_Status_ID, Leave_Status)
+VALUES
+('1', 'Accepted');
+
+INSERT INTO leave_status
+(Leave_Status_ID, Leave_Status)
+VALUES
+('2', 'Rejected');
+
+INSERT INTO leave_status
+(Leave_Status_ID, Leave_Status)
+VALUES
+('3', 'Reassigned');
+
+
+
+=================================================================================================================
+
+
+
+INSERT INTO Modified_Leave_Details
+(Rework_ID, Leave_Request_ID, Leave_Start_Date, Leave_End_Date, Leave_Type_ID, Leave_Reason)
+VALUES
+('1','4', '23-APR-19', '27-APR-2019', 3, 'Vacation Leave');
+
+
+INSERT INTO Modified_Leave_Details
+(Rework_ID, Leave_Request_ID, Leave_Start_Date, Leave_End_Date, Leave_Type_ID, Leave_Reason)
+VALUES
+('2','6', '23-JUN-19', '27-JUN-2019', 3, 'Marriage Leaves');
+
+===============================================================================================================
+
+
+-- 1st Report:
+
+Calculate the number of days of leave, of each employee based on start and end date.
+
+select Employee_Name,
+sum(Leave_End_Date-Leave_start_date) as "Leave_Days" from leave_request_details group by employee_name;
+
+-- 2nd Report:
+
+Evaluating which type of leave taken by all the employees
+
+select count(
+case
+when leave_type_id = 1
+then 1
+else NULL
+end) Casual_Leave,
+count(
+case
+when leave_type_id = 2
+then 1
+else NULL
+end) Sick_Leave,
+count(
+case
+when leave_type_id = 3
+then 1
+else NULL
+end) Earned_Leave
+from leave_request_details;
+
+-- 3rd Report
+counting the number of reworks assigned by each manager.
+
+select l.manager_name,
+count(m.rework_id)
+from leave_request_details l,
+Modified_Leave_Details m
+where l.leave_request_id = m.leave_request_id
+group by l.manager_name;
+
+-- 4th Report
+
+Creation for view for the better visibility of data
+
+
+Create view  Employee_Overall as
+select l.employee_name,
+l.employee_email,
+l.manager_name ,
+l.leave_start_date,
+l.leave_end_date,
+t.leave_type,
+s.leave_status
+from 
+leave_request_details l,
+Leave_Type t,
+Leave_Status s
+where l.leave_type_id = t.leave_type_id
+and l.leave_status_id = s.leave_status_id;
+
+
+--5th report
+
+We tried to create a trigger that would update leave status in the  main leave table when the new data is entered in a rework table.
+
+
+CREATE OR REPLACE TRIGGER update_leave_status
+    BEFORE UPDATE ON modified_leave_details l
+    FOR EACH ROW 
+BEGIN
+   if update on modified_leave_details.rework_id
+   then
+          UPDATE leave_request_details d
+       set d.leave_status = l.leave_status
+       where d.leave_request_id = l.leave_request_id
+    end if;
+END;
+
+
+
+
+
+
+ 
+
+
+
+
